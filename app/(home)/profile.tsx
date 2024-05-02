@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-const Modal = () => {
+const Profile = () => {
   return (
     <View>
-      <Text>Modal</Text>
+      <Text>Profile</Text>
     </View>
   )
 }
 
-export default Modal
+export default Profile

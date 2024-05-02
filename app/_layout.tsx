@@ -1,12 +1,24 @@
-import { Stack } from 'expo-router'
+import { Stack } from "expo-router";
 
 const Layout = () => {
   return (
     <Stack>
-        <Stack.Screen name='(tabs)' options={{headerShown: false}} />
-        <Stack.Screen name='modal' options={{ presentation: 'modal'}} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="(code)/code"
+        options={{
+          title: 'Código de verificación'
+        }}
+      />
+      <Stack.Screen
+        name="(home)"
+        options={{
+          title: 'Home',
+          headerShown: false
+        }}
+      />
     </Stack>
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout;

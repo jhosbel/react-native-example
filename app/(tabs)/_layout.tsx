@@ -1,35 +1,37 @@
 import React from "react";
 import { Tabs } from "expo-router";
-import { AntDesign } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
+import { SimpleLineIcons } from '@expo/vector-icons';
+import { AntDesign } from '@expo/vector-icons';
 
 const TabsLayout = () => {
   return (
     <Tabs
       screenOptions={{
         headerStyle: {
-          backgroundColor: "#1c357f",
+          backgroundColor: "#fff",
         },
-        headerTintColor: "#fff",
+        headerTintColor: "#000",
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="login"
         options={{
-          tabBarLabel: "Home",
+          tabBarLabel: "Ingresar",
+          title: 'Ingresar',
           //headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <AntDesign name="home" size={24} color={color} />
+            <SimpleLineIcons name="login" size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="feed"
+        name="register"
         options={{
-          tabBarLabel: "Feed",
-          title: "My Feed",
+          tabBarLabel: "Registrarse",
+          title: "Registrarse",
           tabBarIcon: ({ color, size }) => (
-            <FontAwesome name="newspaper-o" size={24} color={color} />
+            <AntDesign name="adduser" size={24} color={color} />
           ),
         }}
       />
