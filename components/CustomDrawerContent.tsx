@@ -9,13 +9,27 @@ export default function CustomDrawerContent(props: any) {
   return (
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView {...props}>
-        <View>
+        <View
+          style={{ alignItems: "center", height: 150, gap: 5 }}
+          className="bg-[#282F62]"
+        >
           <Image
-            source={require("../assets/logo-sin-fondo.png")}
-            style={{ width: 100, height: 100, alignSelf: "center" }}
+            source={require("../assets/avatar-8.jpg")}
+            className="rounded-full object-fill"
+            style={{
+              width: 100,
+              height: 100,
+              alignSelf: "center",
+            }}
           />
+          <Text className="text-white">Mario Reyes</Text>
+          <Text className="text-[#7177AB]" style={{ fontSize: 10 }}>
+            Editar mi perfil
+          </Text>
         </View>
-        <DrawerItemList {...props} />
+        <View style={{ height: 650 }} className="bg-[#343B71] justify-center rounded-tr-lg">
+          <DrawerItemList {...props} />
+        </View>
       </DrawerContentScrollView>
     </View>
   );

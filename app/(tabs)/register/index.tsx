@@ -7,9 +7,10 @@ import {
   Image,
 } from "react-native";
 import React from "react";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 const Register = () => {
+  const router = useRouter();
   return (
     <View style={style.container}>
       <View>
@@ -32,11 +33,11 @@ const Register = () => {
         <TextInput style={style.input} placeholder="Correo electronico" />
         <TextInput style={style.input} placeholder="Contraseña" />
         <TextInput style={style.input} placeholder="Numero de telefono" />
-        <TouchableOpacity style={style.button}>
-          {/* <Text style={{ color: "#ffffff" }}>Registrarse</Text> */}
-          <Link href={"/(code)/code"} style={{ color: "#ffffff" }}>
-            Registrarse
-          </Link>
+        <TouchableOpacity
+          onPress={() => router.navigate("/(code)/code")}
+          style={style.button}
+        >
+          <Text style={{ color: "#ffffff" }}>Registrarse</Text>
         </TouchableOpacity>
       </View>
     </View>
