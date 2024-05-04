@@ -17,15 +17,16 @@ const INITIAL_REGION = {
 const Home = () => {
   const sheetRef = useRef<BottomSheet>(null);
   const [isOpen, setIsOpen] = useState(true);
-  const snapPoints = ["50%", "75%"];
+  const [text, setText] = useState("");
+  const snapPoints = ["15%", "50%"];
+
+  const textHanlder = (text: string) => {
+    setText(text);
+  };
 
   return (
     <View style={{ height: "100%" }}>
-      <View
-        style={{
-          flex: 1,
-        }}
-      >
+      <View className="flex-1">
         <MapView
           style={StyleSheet.absoluteFill}
           provider={PROVIDER_GOOGLE}
@@ -39,11 +40,19 @@ const Home = () => {
         snapPoints={snapPoints}
         backgroundStyle={{ backgroundColor: "#343B71" }}
       >
-        <BottomSheetTextInput className="border" />
+        {/* <BottomSheetTextInput
+          className="w-[343px] h-[40px] border self-center rounded-[5px] border-[#545C9B] bg-[#282F62] text-white pl-4"
+          placeholder="¿A dónde quieres ir?"
+          placeholderTextColor={"white"}
+        /> */}
+        <TextInput
+          className="w-[343px] h-[40px] border self-center rounded-[5px] border-[#545C9B] bg-[#282F62] text-white pl-4"
+          placeholder="¿A dónde quieres ir?"
+          placeholderTextColor={"white"}
+          onChangeText={textHanlder}
+          onSubmitEditing={() => console.log(text)}
+        />
         <HomeMapInput />
-        {/* <BottomSheetView>
-          
-        </BottomSheetView> */}
       </BottomSheet>
     </View>
   );

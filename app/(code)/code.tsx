@@ -33,21 +33,25 @@ const CodeVerification = () => {
             style={style.input}
             placeholder="1"
             placeholderTextColor={"#545C9B"}
+            keyboardType="numeric"
           />
           <TextInput
             style={style.input}
             placeholder="2"
             placeholderTextColor={"#545C9B"}
+            keyboardType="numeric"
           />
           <TextInput
             style={style.input}
             placeholder="3"
             placeholderTextColor={"#545C9B"}
+            keyboardType="numeric"
           />
           <TextInput
             style={style.input}
             placeholder="4"
             placeholderTextColor={"#545C9B"}
+            keyboardType="numeric"
           />
         </View>
         <Text style={{ color: "white", fontSize: 10 }}>
