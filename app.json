@@ -19,9 +19,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff",
-        "package": "jhosbel",
-        "googleMapApiKey": "AIzaSyBDQbSDDK-x0fuvN3GIwcsYTacjuNWo4PI"
+        "backgroundColor": "#ffffff"
       }
     },
     "web": {
