@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, Image, TextInput } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import * as Location from 'expo-location'
 import BottomSheet, {
   BottomSheetView,
   BottomSheetTextInput,
