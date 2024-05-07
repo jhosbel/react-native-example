@@ -163,7 +163,7 @@ const Home = () => {
             console.log(details?.geometry?.location);
           }}
           query={{
-            key: "AIzaSyBiWjv9m3sz78o_uf69kKfJKzS-FlJAurU",
+            key: "adas",
             language: "en",
           }}
           styles={{
