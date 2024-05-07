@@ -133,7 +133,7 @@ const Home = () => {
             waypoints={[destination]}
             destination={destination2}
             mode="DRIVING"
-            apikey="asd"
+            apikey={`${process.env.GOOGLE_MAPS_API}`}
             strokeColor="white"
             strokeWidth={2}
             onReady={(result) => {
@@ -163,7 +163,7 @@ const Home = () => {
             console.log(details?.geometry?.location);
           }}
           query={{
-            key: "adas",
+            key: process.env.GOOGLE_MAPS_API,
             language: "en",
           }}
           styles={{
