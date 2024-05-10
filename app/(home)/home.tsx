@@ -11,7 +11,10 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import {
+  GooglePlaceDetail,
+  GooglePlacesAutocomplete,
+} from "react-native-google-places-autocomplete";
 import * as Location from "expo-location";
 import BottomSheet, {
   BottomSheetView,
@@ -22,6 +25,7 @@ import { Entypo } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import customMapStyle from "./customMapStyle.json";
+import { GOOGLE_API_KEY } from "../../env";
 
 const INITIAL_REGION = {
   latitude: 6.167754,
@@ -30,14 +34,40 @@ const INITIAL_REGION = {
   longitudeDelta: 0.0421,
 };
 
+type LatLng = {
+  latitude: number;
+  longitude: number;
+};
+
+type Test = {
+  onPLaceSelected: (details: GooglePlaceDetail | null) => void;
+};
+
 const Home = () => {
   const sheetRef = useRef<BottomSheet>(null);
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [text, setText] = useState("");
   const snapPoints = ["11%", "50%"];
+  const mapRef = useRef<MapView>(null);
 
-  const [timeToDestination, setTimeToDestination] = useState<any>()
-  const [distanceToDestination, setDistanceToDestination] = useState<any>()
+  const [timeToDestination, setTimeToDestination] = useState<any>();
+  const [distanceToDestination, setDistanceToDestination] = useState<any>();
+
+  const moveTo = async (position: LatLng) => {
+    const camera = await mapRef.current?.getCamera();
+    if (camera) {
+      camera.center = position;
+      mapRef.current?.animateCamera(camera, { duration: 1000 });
+    }
+  };
+
+  const onPlaceSelected = (details: GooglePlaceDetail) => {
+    const position = {
+      latitude: details?.geometry.location.lat || 0,
+      longitude: details?.geometry.location.lng || 0,
+    };
+    setDestination(position);
+  };
 
   const [mapRegion, setMapRegion] = useState({
     latitude: 6.167754,
@@ -45,11 +75,11 @@ const Home = () => {
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
-  const [destination, setDestinatio] = useState({
-    latitude: 6.167650052255419,
-    longitude: -75.61957622609135,
+  const [destination, setDestination] = useState<any>({
+    latitude: 6.167572646861407,
+    longitude: -75.62527812955533,
   });
-  const [destination2, setDestinatio2] = useState({
+  const [destination2, setDestinatio2] = useState<any>({
     latitude: 6.167572646861407,
     longitude: -75.62527812955533,
   });
@@ -100,10 +130,13 @@ const Home = () => {
     setText(text);
   };
 
+  console.log(destination);
+
   return (
     <View style={{ height: "100%" }}>
       <View className="flex-1 items-center">
         <MapView
+          ref={mapRef}
           style={style.maps}
           provider={PROVIDER_GOOGLE}
           initialRegion={INITIAL_REGION}
@@ -114,35 +147,39 @@ const Home = () => {
           mapPadding={{ bottom: 300, left: 0, right: 0, top: 300 }}
         >
           <Marker coordinate={mapRegion} />
-          <Marker
+          {/* <Marker
             coordinate={destination}
             draggable
             onDragEnd={(newDestination) =>
-              setDestinatio(newDestination.nativeEvent.coordinate)
+              setDestination(newDestination.nativeEvent.coordinate)
             }
-          />
-          <Marker
-          coordinate={destination2}
-          draggable
-          onDragEnd={(newDestination) =>
-            setDestinatio2(newDestination.nativeEvent.coordinate)
-          }
-        />
-          <MapViewDirections
-            origin={mapRegion}
-            waypoints={[destination]}
-            destination={destination2}
-            mode="DRIVING"
-            apikey={`${process.env.GOOGLE_MAPS_API}`}
-            strokeColor="white"
-            strokeWidth={2}
-            onReady={(result) => {
-              setTimeToDestination(result.duration)
-              console.log(result.distance);
-              setDistanceToDestination(result.distance)
-              console.log(result.duration);
-            }}
-          />
+          /> */}
+          {destination && (
+            <Marker
+              coordinate={destination}
+              draggable
+              onDragEnd={(newDestination) =>
+                setDestination(newDestination.nativeEvent.coordinate)
+              }
+            />
+          )}
+          {destination && (
+            <MapViewDirections
+              origin={mapRegion}
+              //waypoints={[destination]}
+              destination={destination}
+              mode="DRIVING"
+              apikey={`${GOOGLE_API_KEY}`}
+              strokeColor="white"
+              strokeWidth={2}
+              onReady={(result) => {
+                setTimeToDestination(result.duration);
+                console.log(result.distance);
+                setDistanceToDestination(result.distance);
+                console.log(result.duration);
+              }}
+            />
+          )}
         </MapView>
         <View className="w-[340px] h-[30px] rounded-[5px] shadow border-[#EDEDF6] border bg-white mt-[4.5rem] flex-row">
           <View className="h-[7px] w-[7px] bg-[#43B05C] rounded-full self-center ml-[15px]"></View>
@@ -161,6 +198,11 @@ const Home = () => {
           fetchDetails={true}
           onPress={(data, details = null) => {
             console.log(details?.geometry?.location);
+            setIsOpen(true);
+            setDestination({
+              latitude: details?.geometry?.location.lat,
+              longitude: details?.geometry?.location.lng,
+            });
           }}
           query={{
             key: process.env.GOOGLE_MAPS_API,
@@ -181,10 +223,6 @@ const Home = () => {
             },
           }}
         />
-        <View className="bg-white w-[340px] h-[150px]">
-          <Text>Tiempo de llegada: {Math.round(timeToDestination)} min</Text>
-          <Text>Distacina: {distanceToDestination} km</Text>
-        </View>
         {/* <TextInput
           placeholder="Prueba"
           className="w-[340px] h-[30px] rounded-[5px] shadow border-[#EDEDF6] border bg-white mt-8 text-[#343B71]"
@@ -211,6 +249,28 @@ const Home = () => {
         />
         <HomeMapInput />
       </BottomSheet>
+      {isOpen ? (
+        <BottomSheet
+          ref={sheetRef}
+          snapPoints={["25%", "50%"]}
+          backgroundStyle={{ backgroundColor: "#343B71" }}
+        >
+          <Text className="text-center text-white">Elige tu viaje</Text>
+          <View className="flex-row justify-around">
+            <Text className="text-white">Tiempo de llegada: {Math.round(timeToDestination)} min</Text>
+            <Text className="text-white">Distacina: {distanceToDestination} km</Text>
+          </View>
+          <View className="">
+            <View className="flex-row items-center w-[390px] h-[50px] bg-[#282F62] justify-around">
+              <View>
+                <Text className="text-[#7177AB]">Taxi</Text>
+                <Text className="text-[#7177AB]">6 min</Text>
+              </View>
+              <Text className="text-[#7177AB]">$ 10.085 - 13.645</Text>
+            </View>
+          </View>
+        </BottomSheet>
+      ) : null}
     </View>
   );
 };
