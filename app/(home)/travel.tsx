@@ -1,5 +1,11 @@
-import { View, Text, Dimensions, StyleSheet, TouchableOpacity } from "react-native";
-import React, { useRef, useState } from "react";
+import {
+  View,
+  Text,
+  Dimensions,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import Constants from "expo-constants";
 import MapView, { LatLng, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import {
@@ -8,6 +14,8 @@ import {
 } from "react-native-google-places-autocomplete";
 import { InputAutocomplete } from "../../components/InputAutocomplete";
 import MapViewDirections from "react-native-maps-directions";
+import { GOOGLE_API_KEY } from "../../env";
+import * as Location from "expo-location";
 
 const { width, height } = Dimensions.get("window");
 
@@ -21,19 +29,35 @@ const INITIAL_POSITION = {
   longitudeDelta: LONGITUDE_DELTA,
 };
 
-type InputAutocompleteProps = {
-  label: string;
-  placeholder?: string;
-  onPlaceSelected: (details: GooglePlaceDetail | null) => void;
-};
-
 const Travel = () => {
   const [origin, setOrigin] = useState<LatLng | null>();
   const [destination, setDestination] = useState<LatLng | null>();
   const [showDirections, setShowDirections] = useState(false);
   const [distance, setDistance] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [userLocation, setUserLocation] = useState<any>({
+    latitude: 6.167754,
+    longitude: -75.619507,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
   const mapRef = useRef<MapView>(null);
+
+  const getUserLocation = async () => {
+    let location = await Location.getCurrentPositionAsync({});
+    const userLocation = {
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    };
+    setUserLocation(userLocation);
+    console.log(userLocation);
+  };
+
+  useEffect(() => {
+    getUserLocation();
+  }, []);
 
   const moveTo = async (position: LatLng) => {
     const camera = await mapRef.current?.getCamera();
@@ -62,22 +86,20 @@ const Travel = () => {
   };
 
   const traceRoute = () => {
-    if (origin && destination) {
+    if (userLocation && destination) {
       setShowDirections(true);
-      mapRef.current?.fitToCoordinates([origin, destination], { edgePadding });
+      mapRef.current?.fitToCoordinates([userLocation, destination], {
+        edgePadding,
+      });
     }
   };
 
-  const onPlaceSelected = (
-    details: GooglePlaceDetail | null,
-    flag: "origin" | "destination"
-  ) => {
-    const set = flag === "origin" ? setOrigin : setDestination;
+  const onPlaceSelected = (details: GooglePlaceDetail | null) => {
     const position = {
       latitude: details?.geometry.location.lat || 0,
       longitude: details?.geometry.location.lng || 0,
     };
-    set(position);
+    setDestination(position);
     moveTo(position);
   };
   return (
@@ -88,14 +110,17 @@ const Travel = () => {
           style={styles.map}
           provider={PROVIDER_GOOGLE}
           initialRegion={INITIAL_POSITION}
+          region={userLocation}
+          showsUserLocation={true}
+          showsMyLocationButton={false}
         >
-          {origin && <Marker coordinate={origin} />}
+          {/* {userLocation && <Marker coordinate={userLocation} />} */}
           {destination && <Marker coordinate={destination} />}
-          {showDirections && origin && destination && (
+          {showDirections && userLocation && destination && (
             <MapViewDirections
-              origin={origin}
+              origin={userLocation}
               destination={destination}
-              apikey={`${process.env.GOOGLE_MAPS_API}`}
+              apikey={`${GOOGLE_API_KEY}`}
               strokeColor="#6644ff"
               strokeWidth={4}
               onReady={traceRouteOnReady}
@@ -103,16 +128,11 @@ const Travel = () => {
           )}
         </MapView>
         <View style={styles.searchContainer}>
-          <InputAutocomplete
-            label="Origin"
-            onPlaceSelected={(details) => {
-              onPlaceSelected(details, "origin");
-            }}
-          />
+          <Text>Direccion del Usuario</Text>
           <InputAutocomplete
             label="Destination"
             onPlaceSelected={(details) => {
-              onPlaceSelected(details, "destination");
+              onPlaceSelected(details);
             }}
           />
           <TouchableOpacity style={styles.button} onPress={traceRoute}>
@@ -134,7 +154,7 @@ export default Travel;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    //flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",

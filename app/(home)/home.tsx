@@ -53,22 +53,6 @@ const Home = () => {
   const [timeToDestination, setTimeToDestination] = useState<any>();
   const [distanceToDestination, setDistanceToDestination] = useState<any>();
 
-  const moveTo = async (position: LatLng) => {
-    const camera = await mapRef.current?.getCamera();
-    if (camera) {
-      camera.center = position;
-      mapRef.current?.animateCamera(camera, { duration: 1000 });
-    }
-  };
-
-  const onPlaceSelected = (details: GooglePlaceDetail) => {
-    const position = {
-      latitude: details?.geometry.location.lat || 0,
-      longitude: details?.geometry.location.lng || 0,
-    };
-    setDestination(position);
-  };
-
   const [mapRegion, setMapRegion] = useState({
     latitude: 6.167754,
     longitude: -75.619507,
@@ -205,7 +189,7 @@ const Home = () => {
             });
           }}
           query={{
-            key: process.env.GOOGLE_MAPS_API,
+            key: GOOGLE_API_KEY,
             language: "en",
           }}
           styles={{
@@ -260,13 +244,46 @@ const Home = () => {
             <Text className="text-white">Tiempo de llegada: {Math.round(timeToDestination)} min</Text>
             <Text className="text-white">Distacina: {distanceToDestination} km</Text>
           </View>
-          <View className="">
+          <View className="gap-[3px]">
             <View className="flex-row items-center w-[390px] h-[50px] bg-[#282F62] justify-around">
               <View>
                 <Text className="text-[#7177AB]">Taxi</Text>
-                <Text className="text-[#7177AB]">6 min</Text>
+                <Text className="text-[#7177AB] text-[8px]">6 min</Text>
               </View>
               <Text className="text-[#7177AB]">$ 10.085 - 13.645</Text>
+            </View>
+            <View className="flex-row items-center w-[390px] h-[50px] bg-[#282F62] justify-around">
+              <View>
+                <Text className="text-[#7177AB]">Moto Taxi</Text>
+                <Text className="text-[#7177AB] text-[8px]">3 min</Text>
+              </View>
+              <View className="flex-row items-center gap-[7px]">
+                <Text className="text-[#7177AB] bg-white rounded-[25px] w-[40px] h-[25px]">- 500</Text>
+                <TextInput placeholder="$ 8.500" className="text-[#7177AB] w-[60px] h-[25px] bg-white rounded-[25px]" placeholderTextColor={'#7177AB'} />
+                <Text className="text-[#7177AB] bg-white rounded-[25px] w-[40px] h-[25px]">+ 500</Text>
+              </View>
+            </View>
+            <View className="flex-row items-center w-[390px] h-[50px] bg-[#ffffff] justify-around">
+              <View>
+                <Text className="text-[#282F62]">Elige el precio</Text>
+                <Text className="text-[#282F62] text-[8px]">Negocia el mejor precio</Text>
+              </View>
+              <View className="flex-row items-center gap-[7px]">
+                <Text className="text-[#7177AB] bg-white border-[#545C9B] border rounded-[25px] w-[40px] h-[25px]">- 500</Text>
+                <TextInput placeholder="$ 8.500" className="text-[#7177AB] border-[#545C9B] border w-[60px] h-[25px] bg-white rounded-[25px]" placeholderTextColor={'#7177AB'} />
+                <Text className="text-[#7177AB] bg-white border-[#545C9B] border rounded-[25px] w-[40px] h-[25px]">+ 500</Text>
+              </View>
+            </View>
+            <View className="flex-row items-center w-[390px] h-[50px] bg-[#282F62] justify-around">
+              <View>
+                <Text className="text-[#7177AB]">Mudanzas y Acarreos</Text>
+                <Text className="text-[#7177AB] text-[8px]">Negocia el mejor precio para tu mudanza</Text>
+              </View>
+              <View className="flex-row items-center gap-[7px]">
+                <Text className="text-[#7177AB] bg-white rounded-[25px] w-[40px] h-[25px]">- 500</Text>
+                <TextInput placeholder="$ 8.500" className="text-[#7177AB] w-[60px] h-[25px] bg-white rounded-[25px]" placeholderTextColor={'#7177AB'} />
+                <Text className="text-[#7177AB] bg-white rounded-[25px] w-[40px] h-[25px]">+ 500</Text>
+              </View>
             </View>
           </View>
         </BottomSheet>

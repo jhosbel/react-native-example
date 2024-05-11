@@ -6,6 +6,7 @@ import {
   GooglePlaceDetail,
   GooglePlacesAutocomplete,
 } from "react-native-google-places-autocomplete";
+import { GOOGLE_API_KEY } from "../env";
 
 type InputAutocompleteProps = {
   label: string;
@@ -29,7 +30,7 @@ export function InputAutocomplete({
           onPlaceSelected(details);
         }}
         query={{
-          key: process.env.GOOGLE_MAPS_API,
+          key: GOOGLE_API_KEY,
           language: "pt-BR",
         }}
       />
