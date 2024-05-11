@@ -16,16 +16,14 @@ import {
   GooglePlacesAutocomplete,
 } from "react-native-google-places-autocomplete";
 import * as Location from "expo-location";
-import BottomSheet, {
-  BottomSheetView,
-  BottomSheetTextInput,
-} from "@gorhom/bottom-sheet";
+import BottomSheet from "@gorhom/bottom-sheet";
 import HomeMapInput from "../../components/HomeMapInput";
 import { Entypo } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import customMapStyle from "./customMapStyle.json";
 import { GOOGLE_API_KEY } from "../../env";
+import DriverOptions from "../../components/DriverOptions";
 
 const INITIAL_REGION = {
   latitude: 6.167754,
@@ -34,19 +32,11 @@ const INITIAL_REGION = {
   longitudeDelta: 0.0421,
 };
 
-type LatLng = {
-  latitude: number;
-  longitude: number;
-};
-
-type Test = {
-  onPLaceSelected: (details: GooglePlaceDetail | null) => void;
-};
-
 const Home = () => {
   const sheetRef = useRef<BottomSheet>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [text, setText] = useState("");
+  const [userAddress, setUserAddress] = useState("");
   const snapPoints = ["11%", "50%"];
   const mapRef = useRef<MapView>(null);
 
@@ -69,22 +59,6 @@ const Home = () => {
   });
   const [errorMsg, setErrorMsg] = useState("");
 
-  /* const userLocationPermission = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      setErrorMsg("permiso denegado");
-      return;
-    }
-    let location = await Location.getCurrentPositionAsync({});
-    const newRegion = {
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-      latitudeDelta: 0.0922,
-      longitudeDelta: 0.0421,
-    };
-    setMapRegion(newRegion);
-  }; */
-
   const requestLocationPermission = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -96,6 +70,7 @@ const Home = () => {
 
   const getUserLocation = async () => {
     let location = await Location.getCurrentPositionAsync({});
+    console.log(location);
     const newRegion = {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
@@ -105,16 +80,44 @@ const Home = () => {
     setMapRegion(newRegion);
   };
 
+  const getReverseGeocoding = async () => {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${mapRegion.latitude},${mapRegion.longitude}&key=${GOOGLE_API_KEY}`
+      );
+      const data = await response.json();
+      if (data.status === "OK") {
+        const address = data.results[0].formatted_address;
+        const addCut = address.split(",")[0];
+        console.log(addCut);
+        console.log(address);
+        setUserAddress(addCut);
+        return address;
+      } else {
+        throw new Error("Reverse geocoding request failed");
+      }
+    } catch (error) {
+      console.error("Error fetching reverse geocoding:", error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     requestLocationPermission();
     getUserLocation();
   }, []);
+
+  useEffect(() => {
+    getReverseGeocoding();
+  }, [userAddress]);
 
   const textHanlder = (text: string) => {
     setText(text);
   };
 
   console.log(destination);
+  console.log(timeToDestination);
+  console.log(distanceToDestination);
 
   return (
     <View style={{ height: "100%" }}>
@@ -169,7 +172,7 @@ const Home = () => {
           <View className="h-[7px] w-[7px] bg-[#43B05C] rounded-full self-center ml-[15px]"></View>
           <Text className="text-[#343B71] self-center ml-[15px]">|</Text>
           <Text className="text-[#343B71] self-center ml-[15px]">
-            Mi dirección actual
+            {userAddress}
           </Text>
           <Entypo name="plus" size={24} color="#343B71" />
         </View>
@@ -181,7 +184,8 @@ const Home = () => {
           placeholder="A donde quieres ir?"
           fetchDetails={true}
           onPress={(data, details = null) => {
-            console.log(details?.geometry?.location);
+            console.log(details?.adr_address);
+            console.log(data.description);
             setIsOpen(true);
             setDestination({
               latitude: details?.geometry?.location.lat,
@@ -207,17 +211,6 @@ const Home = () => {
             },
           }}
         />
-        {/* <TextInput
-          placeholder="Prueba"
-          className="w-[340px] h-[30px] rounded-[5px] shadow border-[#EDEDF6] border bg-white mt-8 text-[#343B71]"
-        /> */}
-        {/* <TouchableOpacity style={style.pointLocation} onPress={userLocationPermission}>
-          <MaterialCommunityIcons
-            name="crosshairs-gps"
-            size={20}
-            color="white"
-          />
-        </TouchableOpacity> */}
       </View>
       <BottomSheet
         ref={sheetRef}
@@ -234,59 +227,11 @@ const Home = () => {
         <HomeMapInput />
       </BottomSheet>
       {isOpen ? (
-        <BottomSheet
-          ref={sheetRef}
-          snapPoints={["25%", "50%"]}
-          backgroundStyle={{ backgroundColor: "#343B71" }}
-        >
-          <Text className="text-center text-white">Elige tu viaje</Text>
-          <View className="flex-row justify-around">
-            <Text className="text-white">Tiempo de llegada: {Math.round(timeToDestination)} min</Text>
-            <Text className="text-white">Distacina: {distanceToDestination} km</Text>
-          </View>
-          <View className="gap-[3px]">
-            <View className="flex-row items-center w-[390px] h-[50px] bg-[#282F62] justify-around">
-              <View>
-                <Text className="text-[#7177AB]">Taxi</Text>
-                <Text className="text-[#7177AB] text-[8px]">6 min</Text>
-              </View>
-              <Text className="text-[#7177AB]">$ 10.085 - 13.645</Text>
-            </View>
-            <View className="flex-row items-center w-[390px] h-[50px] bg-[#282F62] justify-around">
-              <View>
-                <Text className="text-[#7177AB]">Moto Taxi</Text>
-                <Text className="text-[#7177AB] text-[8px]">3 min</Text>
-              </View>
-              <View className="flex-row items-center gap-[7px]">
-                <Text className="text-[#7177AB] bg-white rounded-[25px] w-[40px] h-[25px]">- 500</Text>
-                <TextInput placeholder="$ 8.500" className="text-[#7177AB] w-[60px] h-[25px] bg-white rounded-[25px]" placeholderTextColor={'#7177AB'} />
-                <Text className="text-[#7177AB] bg-white rounded-[25px] w-[40px] h-[25px]">+ 500</Text>
-              </View>
-            </View>
-            <View className="flex-row items-center w-[390px] h-[50px] bg-[#ffffff] justify-around">
-              <View>
-                <Text className="text-[#282F62]">Elige el precio</Text>
-                <Text className="text-[#282F62] text-[8px]">Negocia el mejor precio</Text>
-              </View>
-              <View className="flex-row items-center gap-[7px]">
-                <Text className="text-[#7177AB] bg-white border-[#545C9B] border rounded-[25px] w-[40px] h-[25px]">- 500</Text>
-                <TextInput placeholder="$ 8.500" className="text-[#7177AB] border-[#545C9B] border w-[60px] h-[25px] bg-white rounded-[25px]" placeholderTextColor={'#7177AB'} />
-                <Text className="text-[#7177AB] bg-white border-[#545C9B] border rounded-[25px] w-[40px] h-[25px]">+ 500</Text>
-              </View>
-            </View>
-            <View className="flex-row items-center w-[390px] h-[50px] bg-[#282F62] justify-around">
-              <View>
-                <Text className="text-[#7177AB]">Mudanzas y Acarreos</Text>
-                <Text className="text-[#7177AB] text-[8px]">Negocia el mejor precio para tu mudanza</Text>
-              </View>
-              <View className="flex-row items-center gap-[7px]">
-                <Text className="text-[#7177AB] bg-white rounded-[25px] w-[40px] h-[25px]">- 500</Text>
-                <TextInput placeholder="$ 8.500" className="text-[#7177AB] w-[60px] h-[25px] bg-white rounded-[25px]" placeholderTextColor={'#7177AB'} />
-                <Text className="text-[#7177AB] bg-white rounded-[25px] w-[40px] h-[25px]">+ 500</Text>
-              </View>
-            </View>
-          </View>
-        </BottomSheet>
+        <DriverOptions
+          sheetRef={sheetRef}
+          timeToDestination={timeToDestination}
+          distanceToDestination={distanceToDestination}
+        />
       ) : null}
     </View>
   );

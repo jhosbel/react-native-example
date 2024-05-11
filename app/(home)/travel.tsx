@@ -8,6 +8,7 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import Constants from "expo-constants";
 import MapView, { LatLng, Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import BottomSheet from "@gorhom/bottom-sheet";
 import {
   GooglePlaceDetail,
   GooglePlacesAutocomplete,
@@ -16,6 +17,9 @@ import { InputAutocomplete } from "../../components/InputAutocomplete";
 import MapViewDirections from "react-native-maps-directions";
 import { GOOGLE_API_KEY } from "../../env";
 import * as Location from "expo-location";
+import { Entypo } from "@expo/vector-icons";
+import DriverOptions from "../../components/DriverOptions";
+import customMapStyle from "./customMapStyle.json";
 
 const { width, height } = Dimensions.get("window");
 
@@ -42,6 +46,7 @@ const Travel = () => {
     longitudeDelta: 0.0421,
   });
   const mapRef = useRef<MapView>(null);
+  const sheetRef = useRef<BottomSheet>(null);
 
   const getUserLocation = async () => {
     let location = await Location.getCurrentPositionAsync({});
@@ -52,12 +57,17 @@ const Travel = () => {
       longitudeDelta: 0.01,
     };
     setUserLocation(userLocation);
-    console.log(userLocation);
   };
 
   useEffect(() => {
     getUserLocation();
   }, []);
+
+  useEffect(() => {
+    if (destination) {
+      traceRoute();
+    }
+  }, [destination]);
 
   const moveTo = async (position: LatLng) => {
     const camera = await mapRef.current?.getCamera();
@@ -113,8 +123,8 @@ const Travel = () => {
           region={userLocation}
           showsUserLocation={true}
           showsMyLocationButton={false}
+          customMapStyle={customMapStyle}
         >
-          {/* {userLocation && <Marker coordinate={userLocation} />} */}
           {destination && <Marker coordinate={destination} />}
           {showDirections && userLocation && destination && (
             <MapViewDirections
@@ -128,24 +138,35 @@ const Travel = () => {
           )}
         </MapView>
         <View style={styles.searchContainer}>
-          <Text>Direccion del Usuario</Text>
-          <InputAutocomplete
-            label="Destination"
-            onPlaceSelected={(details) => {
-              onPlaceSelected(details);
-            }}
-          />
-          <TouchableOpacity style={styles.button} onPress={traceRoute}>
-            <Text style={styles.buttonText}>Trace route</Text>
-          </TouchableOpacity>
-          {distance && duration ? (
-            <View>
-              <Text>Distance: {distance.toFixed(2)}</Text>
-              <Text>Duration: {Math.ceil(duration)} min</Text>
+          <View className="w-[100%] h-[45px] justify-between rounded-[5px] shadow border-[#EDEDF6] border bg-white mt-[4.5rem] flex-row items-center">
+            <View className="flex-row">
+              <View className="h-[7px] w-[7px] bg-[#43B05C] rounded-full self-center ml-[15px]"></View>
+              <Text className="text-[#343B71] self-center ml-[15px]">|</Text>
+              <Text className="text-[#343B71] self-center ml-[15px]">
+                Mi dirección actual
+              </Text>
             </View>
-          ) : null}
+            <Entypo name="plus" size={24} color="#343B71" className="pr-4" />
+          </View>
+            <InputAutocomplete
+              placeholder="A donde quieres ir?"
+              onPlaceSelected={(details) => {
+                onPlaceSelected(details);
+              }}
+            />
+          {/* <View className=" h-[45px] flex-row rounded-[5px] shadow border-[#EDEDF6] border bg-white mt-[13px]">
+            <View className="h-[7px] w-[7px] bg-[#E41B1B] rounded-full self-center ml-[15px]"></View>
+            <Text className="text-[#343B71] self-center ml-[15px]">|</Text>
+          </View> */}
         </View>
       </View>
+      {distance && duration ? (
+        <DriverOptions
+          sheetRef={sheetRef}
+          timeToDestination={duration}
+          distanceToDestination={distance}
+        />
+      ) : null}
     </View>
   );
 };
@@ -154,7 +175,6 @@ export default Travel;
 
 const styles = StyleSheet.create({
   container: {
-    //flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
@@ -166,27 +186,6 @@ const styles = StyleSheet.create({
   searchContainer: {
     position: "absolute",
     width: "90%",
-    backgroundColor: "white",
-    shadowColor: "black",
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    elevation: 4,
-    padding: 8,
-    borderRadius: 8,
     top: Constants.statusBarHeight,
-  },
-  input: {
-    borderColor: "#888",
-    borderWidth: 1,
-  },
-  button: {
-    backgroundColor: "#bbb",
-    paddingVertical: 12,
-    marginTop: 16,
-    borderRadius: 4,
-  },
-  buttonText: {
-    textAlign: "center",
   },
 });

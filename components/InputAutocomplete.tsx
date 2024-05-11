@@ -1,7 +1,4 @@
-import {
-  StyleSheet,
-  Text,
-} from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import {
   GooglePlaceDetail,
   GooglePlacesAutocomplete,
@@ -9,7 +6,7 @@ import {
 import { GOOGLE_API_KEY } from "../env";
 
 type InputAutocompleteProps = {
-  label: string;
+  label?: string;
   placeholder?: string;
   onPlaceSelected: (details: GooglePlaceDetail | null) => void;
 };
@@ -21,9 +18,11 @@ export function InputAutocomplete({
 }: InputAutocompleteProps) {
   return (
     <>
-      <Text>{label}</Text>
       <GooglePlacesAutocomplete
-        styles={{ textInput: styles.input }}
+        styles={{
+          textInput: styles.input,
+          predefinedPlacesDescription: styles.placeHolderColor,
+        }}
         placeholder={placeholder || ""}
         fetchDetails
         onPress={(data, details = null) => {
@@ -40,7 +39,12 @@ export function InputAutocomplete({
 
 const styles = StyleSheet.create({
   input: {
-    borderColor: "#888",
-    borderWidth: 1,
+    height: 45,
+    color: "#343B71",
+    fontSize: 13,
+    marginTop: 13,
+  },
+  placeHolderColor: {
+    color: "#1faadb",
   },
 });
