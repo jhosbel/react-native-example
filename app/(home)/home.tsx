@@ -7,9 +7,15 @@ import {
   Button,
   Animated,
   TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import MapView, { PROVIDER_GOOGLE, Marker, Polyline } from "react-native-maps";
+import MapView, {
+  PROVIDER_GOOGLE,
+  Marker,
+  Polyline,
+  LatLng,
+} from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
 import {
   GooglePlaceDetail,
@@ -24,66 +30,114 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import customMapStyle from "./customMapStyle.json";
 import { GOOGLE_API_KEY } from "../../env";
 import DriverOptions from "../../components/DriverOptions";
+import { InputAutocomplete } from "../../components/InputAutocomplete";
+import Constants from "expo-constants";
 
-const INITIAL_REGION = {
+const { width, height } = Dimensions.get("window");
+
+const ASPECT_RATIO = width / height;
+const LATITUDE_DELTA = 0.02;
+const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+const INITIAL_POSITION = {
   latitude: 6.167754,
   longitude: -75.619507,
-  latitudeDelta: 0.0922,
-  longitudeDelta: 0.0421,
+  latitudeDelta: LATITUDE_DELTA,
+  longitudeDelta: LONGITUDE_DELTA,
 };
 
 const Home = () => {
-  const sheetRef = useRef<BottomSheet>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [text, setText] = useState("");
+  const [destination, setDestination] = useState<LatLng | null>();
+  const [showDirections, setShowDirections] = useState(false);
+  const [distance, setDistance] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [userAddress, setUserAddress] = useState("");
-  const snapPoints = ["11%", "50%"];
-  const mapRef = useRef<MapView>(null);
-
-  const [timeToDestination, setTimeToDestination] = useState<any>();
-  const [distanceToDestination, setDistanceToDestination] = useState<any>();
-
-  const [mapRegion, setMapRegion] = useState({
+  const [text, setText] = useState("");
+  const [userLocation, setUserLocation] = useState<any>({
     latitude: 6.167754,
     longitude: -75.619507,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
-  const [destination, setDestination] = useState<any>({
-    latitude: 6.167572646861407,
-    longitude: -75.62527812955533,
-  });
-  const [destination2, setDestinatio2] = useState<any>({
-    latitude: 6.167572646861407,
-    longitude: -75.62527812955533,
-  });
-  const [errorMsg, setErrorMsg] = useState("");
+
+  const snapPoints = ["11%", "50%"];
+  const sheetRef = useRef<BottomSheet>(null);
+  const mapRef = useRef<MapView>(null);
 
   const requestLocationPermission = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
-      setErrorMsg("permiso denegado");
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("permiso denegado");
+        return false;
+      }
+      return true;
+    } catch (error) {
+      setErrorMsg("Error al solicitar permisos");
       return false;
     }
-    return true;
   };
 
   const getUserLocation = async () => {
     let location = await Location.getCurrentPositionAsync({});
-    console.log(location);
-    const newRegion = {
+    const userLocation = {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude,
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
     };
-    setMapRegion(newRegion);
+    setUserLocation(userLocation);
+  };
+
+  const moveTo = async (position: LatLng) => {
+    const camera = await mapRef.current?.getCamera();
+    if (camera) {
+      camera.center = position;
+      mapRef.current?.animateCamera(camera, { duration: 1000 });
+    }
+  };
+
+  const edgePaddingValue = 70;
+
+  const edgePadding = {
+    top: edgePaddingValue,
+    right: edgePaddingValue,
+    bottom: edgePaddingValue,
+    left: edgePaddingValue,
+  };
+
+  const traceRouteOnReady = (args: any) => {
+    if (args) {
+      // args.distance
+      // args.duration
+      setDistance(args.distance);
+      setDuration(args.duration);
+    }
+  };
+
+  const traceRoute = () => {
+    if (userLocation && destination) {
+      setShowDirections(true);
+      mapRef.current?.fitToCoordinates([userLocation, destination], {
+        edgePadding,
+      });
+    }
+  };
+
+  const onPlaceSelected = (details: GooglePlaceDetail | null) => {
+    const position = {
+      latitude: details?.geometry.location.lat || 0,
+      longitude: details?.geometry.location.lng || 0,
+    };
+    setDestination(position);
+    moveTo(position);
   };
 
   const getReverseGeocoding = async () => {
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${mapRegion.latitude},${mapRegion.longitude}&key=${GOOGLE_API_KEY}`
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${userLocation.latitude},${userLocation.longitude}&key=${GOOGLE_API_KEY}`
       );
       const data = await response.json();
       if (data.status === "OK") {
@@ -111,13 +165,19 @@ const Home = () => {
     getReverseGeocoding();
   }, [userAddress]);
 
+  useEffect(() => {
+    if (destination) {
+      traceRoute();
+    }
+  }, [destination]);
+
   const textHanlder = (text: string) => {
     setText(text);
   };
 
   console.log(destination);
-  console.log(timeToDestination);
-  console.log(distanceToDestination);
+  console.log(duration);
+  console.log(destination);
 
   return (
     <View style={{ height: "100%" }}>
@@ -126,91 +186,47 @@ const Home = () => {
           ref={mapRef}
           style={style.maps}
           provider={PROVIDER_GOOGLE}
-          initialRegion={INITIAL_REGION}
-          region={mapRegion}
+          //initialRegion={INITIAL_POSITION}
+          region={userLocation}
           showsUserLocation={true}
-          showsMyLocationButton={true}
+          showsMyLocationButton={false}
           customMapStyle={customMapStyle}
-          mapPadding={{ bottom: 300, left: 0, right: 0, top: 300 }}
         >
-          <Marker coordinate={mapRegion} />
-          {/* <Marker
-            coordinate={destination}
-            draggable
-            onDragEnd={(newDestination) =>
-              setDestination(newDestination.nativeEvent.coordinate)
-            }
-          /> */}
-          {destination && (
-            <Marker
-              coordinate={destination}
-              draggable
-              onDragEnd={(newDestination) =>
-                setDestination(newDestination.nativeEvent.coordinate)
-              }
-            />
-          )}
-          {destination && (
+          {destination && <Marker coordinate={destination} />}
+          {showDirections && userLocation && destination && (
             <MapViewDirections
-              origin={mapRegion}
-              //waypoints={[destination]}
+              origin={userLocation}
               destination={destination}
-              mode="DRIVING"
               apikey={`${GOOGLE_API_KEY}`}
-              strokeColor="white"
-              strokeWidth={2}
-              onReady={(result) => {
-                setTimeToDestination(result.duration);
-                console.log(result.distance);
-                setDistanceToDestination(result.distance);
-                console.log(result.duration);
-              }}
+              strokeColor="#6644ff"
+              strokeWidth={4}
+              onReady={traceRouteOnReady}
             />
           )}
         </MapView>
-        <View className="w-[340px] h-[30px] rounded-[5px] shadow border-[#EDEDF6] border bg-white mt-[4.5rem] flex-row">
-          <View className="h-[7px] w-[7px] bg-[#43B05C] rounded-full self-center ml-[15px]"></View>
-          <Text className="text-[#343B71] self-center ml-[15px]">|</Text>
-          <Text className="text-[#343B71] self-center ml-[15px]">
-            {userAddress}
-          </Text>
-          <Entypo name="plus" size={24} color="#343B71" />
-        </View>
-        {/* <View className="w-[340px] h-[30px] rounded-[5px] shadow border-[#EDEDF6] border bg-white mt-8 flex-row">
-            <Text className="text-[#343B71] self-center ml-[15px]">{text}</Text>
-            <Ionicons name="remove" size={24} color="#343B71" />
+        <View style={style.searchContainer}>
+          <View className="w-[100%] h-[45px] justify-between rounded-[5px] shadow border-[#EDEDF6] border bg-white mt-[4.5rem] flex-row items-center">
+            <View className="flex-row">
+              <View className="h-[7px] w-[7px] bg-[#43B05C] rounded-full self-center ml-[15px]"></View>
+              <Text className="text-[#343B71] self-center ml-[15px]">|</Text>
+              <Text className="text-[#343B71] self-center ml-[15px]">
+                {userAddress}
+              </Text>
+            </View>
+            {/* <Entypo name="plus" size={24} color="#343B71" className="pr-4" /> */}
+          </View>
+          <InputAutocomplete
+            setIsOpen={setIsOpen}
+            placeholder="A donde quieres ir?"
+            onPlaceSelected={(details) => {
+              onPlaceSelected(details);
+            }}
+          />
+          {/* <View className=" h-[45px] flex-row rounded-[5px] shadow border-[#EDEDF6] border bg-white mt-[13px]">
+            <View className="h-[7px] w-[7px] bg-[#E41B1B] rounded-full self-center ml-[15px]"></View>
+            <Text className="text-[#343B71] self-center ml-[15px]">|</Text>
           </View> */}
-        <GooglePlacesAutocomplete
-          placeholder="A donde quieres ir?"
-          fetchDetails={true}
-          onPress={(data, details = null) => {
-            console.log(details?.adr_address);
-            console.log(data.description);
-            setIsOpen(true);
-            setDestination({
-              latitude: details?.geometry?.location.lat,
-              longitude: details?.geometry?.location.lng,
-            });
-          }}
-          query={{
-            key: GOOGLE_API_KEY,
-            language: "en",
-          }}
-          styles={{
-            textInputContainer: {
-              width: 340,
-              marginTop: 11,
-            },
-            textInput: {
-              height: 30,
-              color: "#343B71",
-              fontSize: 13,
-            },
-            predefinedPlacesDescription: {
-              color: "#1faadb",
-            },
-          }}
-        />
+        </View>
       </View>
       <BottomSheet
         ref={sheetRef}
@@ -229,8 +245,8 @@ const Home = () => {
       {isOpen ? (
         <DriverOptions
           sheetRef={sheetRef}
-          timeToDestination={timeToDestination}
-          distanceToDestination={distanceToDestination}
+          timeToDestination={duration}
+          distanceToDestination={distance}
         />
       ) : null}
     </View>
@@ -239,7 +255,8 @@ const Home = () => {
 
 const style = StyleSheet.create({
   maps: {
-    ...StyleSheet.absoluteFillObject,
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height,
   },
   sheet: {
     backgroundColor: "#343B71",
@@ -261,6 +278,16 @@ const style = StyleSheet.create({
     backgroundColor: "#282F62",
     alignSelf: "center",
     paddingLeft: 16,
+  },
+  searchContainer: {
+    position: "absolute",
+    width: "90%",
+    top: Constants.statusBarHeight,
+  },
+  container: {
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 

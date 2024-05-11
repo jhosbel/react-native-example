@@ -8,6 +8,7 @@ import { GOOGLE_API_KEY } from "../env";
 type InputAutocompleteProps = {
   label?: string;
   placeholder?: string;
+  setIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
   onPlaceSelected: (details: GooglePlaceDetail | null) => void;
 };
 
@@ -15,6 +16,7 @@ export function InputAutocomplete({
   label,
   placeholder,
   onPlaceSelected,
+  setIsOpen
 }: InputAutocompleteProps) {
   return (
     <>
@@ -26,6 +28,7 @@ export function InputAutocomplete({
         placeholder={placeholder || ""}
         fetchDetails
         onPress={(data, details = null) => {
+          if(setIsOpen) setIsOpen(true)
           onPlaceSelected(details);
         }}
         query={{
