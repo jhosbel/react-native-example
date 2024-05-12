@@ -8,7 +8,7 @@ const UserMessages = () => {
         
         <View className="border-b-[1px] border-[#7177AB] p-4 flex-row justify-between">
           <View className="flex-row gap-4">
-            <Image source={require("../../../assets/avatar-8.jpg")} style={style.img} />
+            <Image source={require("../../assets/avatar-8.jpg")} style={style.img} />
             <View>
               <Text className="text-white text-[13px]">Carlos</Text>
               <Text className="text-[#7177AB] text-[10px]">
@@ -21,7 +21,7 @@ const UserMessages = () => {
 
         <View className="border-b-[1px] border-[#7177AB] p-4 flex-row justify-between">
           <View className="flex-row gap-4">
-            <Image source={require("../../../assets/avatar-8.jpg")} style={style.img} />
+            <Image source={require("../../assets/avatar-8.jpg")} style={style.img} />
             <View>
               <Text className="text-white text-[13px]">Carlos</Text>
               <Text className="text-[#7177AB] text-[10px]">
@@ -34,7 +34,7 @@ const UserMessages = () => {
 
         <View className="border-b-[1px] border-[#7177AB] p-4 flex-row justify-between">
           <View className="flex-row gap-4">
-            <Image source={require("../../../assets/avatar-8.jpg")} style={style.img} />
+            <Image source={require("../../assets/avatar-8.jpg")} style={style.img} />
             <View>
               <Text className="text-white text-[13px]">Carlos</Text>
               <Text className="text-[#7177AB] text-[10px]">
@@ -47,7 +47,7 @@ const UserMessages = () => {
 
         <View className="border-b-[1px] border-[#7177AB] p-4 flex-row justify-between">
           <View className="flex-row gap-4">
-            <Image source={require("../../../assets/avatar-8.jpg")} style={style.img} />
+            <Image source={require("../../assets/avatar-8.jpg")} style={style.img} />
             <View>
               <Text className="text-white text-[13px]">Carlos</Text>
               <Text className="text-[#7177AB] text-[10px]">
@@ -60,7 +60,7 @@ const UserMessages = () => {
 
         <View className="border-b-[1px] border-[#7177AB] p-4 flex-row justify-between">
           <View className="flex-row gap-4">
-            <Image source={require("../../../assets/avatar-8.jpg")} style={style.img} />
+            <Image source={require("../../assets/avatar-8.jpg")} style={style.img} />
             <View>
               <Text className="text-white text-[13px]">Carlos</Text>
               <Text className="text-[#7177AB] text-[10px]">
