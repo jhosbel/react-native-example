@@ -4,6 +4,8 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Button,
+  Modal,
 } from "react-native";
 import React, { useState } from "react";
 import BottomSheet, {
@@ -18,6 +20,21 @@ const DriverOptions = ({
   distanceToDestination,
 }: any) => {
   const [selectedButton, setSelectedButton] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  const ModalPersonal = () => (
+    <Modal
+      visible={isVisible}
+      animationType="slide"
+      onRequestClose={() => setIsVisible(false)}
+      transparent
+    >
+      <View className="h-[740px] bg-[#ffffff] justify-center items-center">
+        <Text>This is a Modal</Text>
+        <Button title="Close Modal" onPress={() => setIsVisible(false)} />
+      </View>
+    </Modal>
+  );
 
   const handlePress = (buttonName: any) => {
     setSelectedButton(buttonName);
@@ -322,7 +339,7 @@ const DriverOptions = ({
             </Text>
           </View>
           <View className="w-[360px] h-[45px] bg-white rounded-[10px] justify-center items-center">
-            <Text className="text-[#343B71] text-[20px] font-semibold">
+            <Text onPress={() => setIsVisible(true)} className="text-[#343B71] text-[20px] font-semibold">
               Confirmar
             </Text>
           </View>
@@ -333,6 +350,7 @@ const DriverOptions = ({
           </View>
         </View>
       </BottomSheetScrollView>
+      <ModalPersonal />
     </BottomSheet>
   );
 };
