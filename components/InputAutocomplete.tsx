@@ -16,7 +16,7 @@ export function InputAutocomplete({
   label,
   placeholder,
   onPlaceSelected,
-  setIsOpen
+  setIsOpen,
 }: InputAutocompleteProps) {
   return (
     <>
@@ -24,6 +24,9 @@ export function InputAutocomplete({
         styles={{
           textInput: styles.input,
           predefinedPlacesDescription: styles.placeHolderColor,
+        }}
+        textInputProps={{
+          autoFocus: true
         }}
         placeholder={placeholder || ""}
         fetchDetails

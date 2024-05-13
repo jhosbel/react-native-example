@@ -52,6 +52,9 @@ const Home = () => {
   const [duration, setDuration] = useState(0);
   const [errorMsg, setErrorMsg] = useState("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpenSearch, setIsOpenSearch] = useState<boolean>(false);
+  const [isOpenSheet, setIsOpenSheet] = useState<boolean>(true);
+  const [bottomSheetIndex, setBottomSheetIndex] = useState(1);
   const [userAddress, setUserAddress] = useState("");
   const [text, setText] = useState("");
   const [userLocation, setUserLocation] = useState<any>({
@@ -171,6 +174,10 @@ const Home = () => {
     }
   }, [destination]);
 
+  useEffect(() => {
+
+  },[sheetRef])
+
   const textHanlder = (text: string) => {
     setText(text);
   };
@@ -178,6 +185,13 @@ const Home = () => {
   console.log(destination);
   console.log(duration);
   console.log(destination);
+
+  const closedSheet = () => {
+    setIsOpenSearch(true);
+    setBottomSheetIndex(0);
+    //setIsOpenSheet(false)
+    //sheetRef.current?.close();
+  };
 
   return (
     <View style={{ height: "100%" }}>
@@ -204,44 +218,62 @@ const Home = () => {
             />
           )}
         </MapView>
-        <View style={style.searchContainer}>
-          <View className="w-[100%] h-[45px] justify-between rounded-[5px] shadow border-[#EDEDF6] border bg-white mt-[4.5rem] flex-row items-center">
-            <View className="flex-row">
-              <View className="h-[7px] w-[7px] bg-[#43B05C] rounded-full self-center ml-[15px]"></View>
-              <Text className="text-[#343B71] self-center ml-[15px]">|</Text>
-              <Text className="text-[#343B71] self-center ml-[15px]">
-                {userAddress}
-              </Text>
+        {isOpenSearch ? (
+          <View style={style.searchContainer}>
+            <View className="w-[100%] h-[45px] justify-between rounded-[5px] shadow border-[#EDEDF6] border bg-white mt-[4.5rem] flex-row items-center">
+              <View className="flex-row">
+                <View className="h-[7px] w-[7px] bg-[#43B05C] rounded-full self-center ml-[15px]"></View>
+                <Text className="text-[#343B71] self-center ml-[15px]">|</Text>
+                <Text className="text-[#343B71] self-center ml-[15px]">
+                  {userAddress}
+                </Text>
+              </View>
+              {/* <Entypo name="plus" size={24} color="#343B71" className="pr-4" /> */}
             </View>
-            {/* <Entypo name="plus" size={24} color="#343B71" className="pr-4" /> */}
-          </View>
-          <InputAutocomplete
-            setIsOpen={setIsOpen}
-            placeholder="A donde quieres ir?"
-            onPlaceSelected={(details) => {
-              onPlaceSelected(details);
-            }}
-          />
-          {/* <View className=" h-[45px] flex-row rounded-[5px] shadow border-[#EDEDF6] border bg-white mt-[13px]">
+            <InputAutocomplete
+              setIsOpen={setIsOpen}
+              placeholder="A donde quieres ir?"
+              onPlaceSelected={(details) => {
+                onPlaceSelected(details);
+              }}
+            />
+            {/* <View className=" h-[45px] flex-row rounded-[5px] shadow border-[#EDEDF6] border bg-white mt-[13px]">
             <View className="h-[7px] w-[7px] bg-[#E41B1B] rounded-full self-center ml-[15px]"></View>
             <Text className="text-[#343B71] self-center ml-[15px]">|</Text>
           </View> */}
-        </View>
+          </View>
+        ) : null}
       </View>
-      <BottomSheet
-        ref={sheetRef}
-        snapPoints={snapPoints}
-        backgroundStyle={{ backgroundColor: "#343B71" }}
-      >
-        <TextInput
+      {isOpenSheet ? (
+        <BottomSheet
+          ref={sheetRef}
+          snapPoints={snapPoints}
+          index={bottomSheetIndex}
+          backgroundStyle={{ backgroundColor: "#343B71" }}
+          //enablePanDownToClose={true}
+        >
+          {/* <TextInput
           className="w-[343px] h-[40px] border self-center rounded-[5px] border-[#545C9B] bg-[#282F62] text-white pl-4"
           placeholder="¿A dónde quieres ir?"
           placeholderTextColor={"white"}
           onChangeText={textHanlder}
+          onPressIn={() => {
+            closedSheet();
+          }}
           onSubmitEditing={() => console.log(text)}
-        />
-        <HomeMapInput />
-      </BottomSheet>
+        /> */}
+          <TouchableOpacity
+          style={style.button}
+            className="w-[343px] h-[40px] border self-center rounded-[5px] border-[#545C9B] bg-[#282F62] text-white pl-4"
+            onPressIn={() => {
+              closedSheet();
+            }}
+          >
+            <Text className="text-white">A donde quieres ir?</Text>
+          </TouchableOpacity>
+          <HomeMapInput />
+        </BottomSheet>
+      ) : null}
       {isOpen ? (
         <DriverOptions
           sheetRef={sheetRef}
@@ -289,6 +321,18 @@ const style = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  button: {
+    width: 343,
+    height: 40,
+    borderWidth: 1,
+    alignSelf: 'center',
+    borderRadius: 5,
+    borderColor: '#545C9B',
+    backgroundColor: '#282F62',
+    paddingLeft: 4,
+    justifyContent: 'center',
+    alignItems: 'center'
+  }
 });
 
 export default Home;
