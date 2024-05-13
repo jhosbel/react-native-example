@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import React, { useState } from "react";
-import { Colors, Switch } from "react-native-ui-lib";
+import { Colors, Drawer, Switch } from "react-native-ui-lib";
 
 const Settings = () => {
   const [isEnabled, setIsEnabled] = useState(false);

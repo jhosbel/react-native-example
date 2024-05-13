@@ -59,7 +59,7 @@ const DriverOptions = ({
                   style={selectedButton === "button1" && style.selectTextColor}
                   className="text-[#7177AB] text-[8px]"
                 >
-                  6 min
+                  {Math.ceil(timeToDestination)} min
                 </Text>
               </View>
               <View className="flex-1">
@@ -94,7 +94,7 @@ const DriverOptions = ({
                   ]}
                   className="text-[#7177AB] text-[8px]"
                 >
-                  3 min
+                  {Math.ceil(timeToDestination)} min
                 </Text>
               </View>
               <View className="flex-row items-center gap-[7px] flex-1">
@@ -117,6 +117,8 @@ const DriverOptions = ({
                 </View>
                 <View>
                   <TextInput
+                    keyboardType="numeric"
+                    editable={selectedButton === "button2" ? true : false}
                     placeholder="$8.500"
                     className={`${
                       selectedButton === "button2"
@@ -196,6 +198,8 @@ const DriverOptions = ({
                 </View>
                 <View>
                   <TextInput
+                    keyboardType="numeric"
+                    editable={selectedButton === "button3" ? true : false}
                     placeholder="$8.500"
                     className={`${
                       selectedButton === "button3"
@@ -275,6 +279,8 @@ const DriverOptions = ({
                 </View>
                 <View>
                   <TextInput
+                    keyboardType="numeric"
+                    editable={selectedButton === "button4" ? true : false}
                     placeholder="$8.500"
                     className={`${
                       selectedButton === "button4"
@@ -343,7 +349,7 @@ const style = StyleSheet.create({
     flexDirection: "row",
   },
   selectedButton: {
-    backgroundColor: "white", // Color de fondo cuando está seleccionado
+    backgroundColor: "white",
   },
   selectTextColor: {
     color: "#282F62",
