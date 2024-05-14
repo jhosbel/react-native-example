@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Button,
   Modal,
+  Image,
 } from "react-native";
 import React, { useState } from "react";
 import BottomSheet, {
@@ -13,6 +14,7 @@ import BottomSheet, {
   BottomSheetTextInput,
   BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
+import ModalComponent from "./ModalComponent";
 
 const DriverOptions = ({
   sheetRef,
@@ -27,9 +29,15 @@ const DriverOptions = ({
       visible={isVisible}
       animationType="slide"
       onRequestClose={() => setIsVisible(false)}
-      transparent
+      transparent={true}
+      style={{
+        justifyContent: "center",
+        alignContent: "center",
+        alignItems: "center",
+        alignSelf: "center",
+      }}
     >
-      <View className="h-[740px] bg-[#ffffff] justify-center items-center">
+      <View className="bg-[#ffffff] h-[300px] justify-center items-center">
         <Text>This is a Modal</Text>
         <Button title="Close Modal" onPress={() => setIsVisible(false)} />
       </View>
@@ -339,7 +347,10 @@ const DriverOptions = ({
             </Text>
           </View>
           <View className="w-[360px] h-[45px] bg-white rounded-[10px] justify-center items-center">
-            <Text onPress={() => setIsVisible(true)} className="text-[#343B71] text-[20px] font-semibold">
+            <Text
+              onPress={() => setIsVisible(true)}
+              className="text-[#343B71] text-[20px] font-semibold"
+            >
               Confirmar
             </Text>
           </View>
@@ -350,7 +361,39 @@ const DriverOptions = ({
           </View>
         </View>
       </BottomSheetScrollView>
-      <ModalPersonal />
+      <ModalComponent isVisible={isVisible} setIsVisible={setIsVisible}>
+        <View
+          style={style.shadow}
+          className="w-[335px] bg-[#343B71] justify-around items-center flex-row py-2"
+        >
+          <View className="flex-row items-center gap-3">
+            <View>
+              <Image
+                className="rounded-full object-fill"
+                source={require("../assets/avatar-8.jpg")}
+                style={{
+                  width: 45,
+                  height: 45,
+                  alignSelf: "center",
+                }}
+              />
+            </View>
+            <View>
+              <Text className="text-white text-[13px]">Alex Martin</Text>
+              <Text className="text-white text-[13px]">4.4</Text>
+              <Text className="text-white text-[13px]">Nissan Sentra</Text>
+              <Text className="text-white text-[13px]">
+                AAA 123 - BOGOTA DC
+              </Text>
+            </View>
+          </View>
+          <View className="justify-center items-center">
+            <View className="w-[100px] h-[25px] rounded-[10px] bg-white justify-center items-center ">
+              <Text>Contactar</Text>
+            </View>
+          </View>
+        </View>
+      </ModalComponent>
     </BottomSheet>
   );
 };
@@ -376,5 +419,8 @@ const style = StyleSheet.create({
   borderRounded: {
     borderWidth: 1,
     borderColor: "#545C9B",
+  },
+  shadow: {
+    elevation: 10,
   },
 });
